@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 # Install dependencies into a temp directory to cache them
 FROM base AS install
 RUN mkdir -p /temp/dev
-COPY package.json bun.lockb /temp/dev/
+COPY package.json bun.lock* /temp/dev/
 RUN cd /temp/dev && bun install --frozen-lockfile
 
 # Copy everything to the final image
