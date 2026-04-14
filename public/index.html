@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Bun Task Manager</title>
+</head>
+<body class="bg-gray-900 text-white p-10">
+  <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+    <h1 class="text-2xl font-bold mb-4 text-pink-500">Bun Tasks</h1>
+    
+    <div class="flex gap-2 mb-6">
+      <input id="taskInput" type="text" placeholder="New task..." 
+        class="flex-1 bg-gray-900 border border-gray-600 rounded p-2 focus:outline-none focus:border-pink-500">
+      <button onclick="addTask()" class="bg-pink-600 px-4 py-2 rounded font-bold hover:bg-pink-500">Add</button>
+    </div>
+
+    <ul id="taskList" class="space-y-2"></ul>
+  </div>
+
+  <script>
+    async function loadTasks() {
+      const res = await fetch('/api/tasks');
+      const tasks = await res.json();
+      const list = document.getElementById('taskList');
+      // Notice we use standard ${} here now without escaping
+      list.innerHTML = tasks.map(t => `
+        <li class="flex justify-between items-center bg-gray-900 p-3 rounded border border-gray-700">
+          <span>${t.text}</span>
+          <button onclick="deleteTask(${t.id})" class="text-red-500 hover:text-red-400 text-sm">Delete</button>
+        </li>
+      `).join('');
+    }
+
+    async function addTask() {
+      const input = document.getElementById('taskInput');
+      if (!input.value) return;
+      await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: input.value })
+      });
+      input.value = '';
+      loadTasks();
+    }
+
+    async function deleteTask(id) {
+      await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+      loadTasks();
+    }
+
+    loadTasks();
+  </script>
+</body>
+</html>
